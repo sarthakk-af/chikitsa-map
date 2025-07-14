@@ -1,6 +1,7 @@
 import mongoose, { Schema, Document } from 'mongoose';
 
 export interface IDoctor extends Document {
+  _id:mongoose.Types.ObjectId;
   name: string;
   age: number;
   specialization: string;
@@ -44,7 +45,6 @@ const doctorSchema: Schema<IDoctor> = new Schema(
       {
         type: mongoose.Types.ObjectId,
         ref: 'Hospital',
-        required: [true, 'At least one hospital must be assigned'],
       },
     ],
 

@@ -1,6 +1,29 @@
-.heading{
-  font-size: larger;
-  font-weight: bold;
-  color: red;
-  margin-bottom: 20px;
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.input {
+  @apply w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400;
+}
+
+@keyframes blob {
+  0%, 100% {
+    transform: translate(0px, 0px) scale(1);
+  }
+  33% {
+    transform: translate(30px, -50px) scale(1.1);
+  }
+  66% {
+    transform: translate(-20px, 20px) scale(0.9);
+  }
+}
+
+.animate-blob {
+  animation: blob 8s infinite;
+}
+.animation-delay-2000 {
+  animation-delay: 2s;
+}
+.animation-delay-4000 {
+  animation-delay: 4s;
 }

@@ -6,7 +6,7 @@ import adminsRoutes from './routes/adminsRoutes';
 import hospitalsRoutes from './routes/hospitalsRoutes';
 import doctorsRoutes from './routes/doctorsRoutes'
 import cors from 'cors';
-
+import linkRoutes from './routes/linkRoutes';
 
 dotenv.config(); // ✅ Load environment variables at the very top
 
@@ -40,6 +40,7 @@ app.use('/api/users', usersRoutes);
 app.use('/api/admins', adminsRoutes);
 app.use('/api/hospitals',hospitalsRoutes);
 app.use('/api/doctors',doctorsRoutes);
+app.use('/api/link',linkRoutes);
 
 // ✅ MongoDB Connection
 const connectDB = async () => {

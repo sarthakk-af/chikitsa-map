@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
-import doctors from '../schemas/doctors';
-import hospitalsModel from '../schemas/hospitals'; // Renamed to avoid name conflict with hospitals array
+import doctorsModel from '../schemas/doctors';
+import hospitalsModel, { IHospital } from '../schemas/hospitals'; // Renamed to avoid name conflict with hospitals array
 import mongoose from 'mongoose';
 
 // =====================
@@ -22,44 +22,71 @@ export const addDoctor = async (req: Request, res: Response): Promise<any> => {
       profileImage,
     } = req.body;
 
-    console.log("Incoming add doctor request:", req.body);
+    console.log("📥 Incoming doctor data:", req.body);
 
     // Required field validation
     if (
       !name ||
       !age ||
       !specialization ||
-      !hospitals ||
-      !experienceYears ||
-      !qualifications ||
-      !availableDays ||
-      !timings ||
+      !experienceYears === undefined ||
+      !Array.isArray(qualifications) || qualifications.length === 0 ||
+      !Array.isArray(availableDays) || availableDays.length === 0 ||
+      !Array.isArray(timings) || timings.length === 0 ||
       typeof isAvailable !== 'boolean'
     ) {
       console.warn("❌ Missing required fields");
       return res.status(400).json({ error: "All required fields must be filled." });
     }
 
-    // if (!Array.isArray(hospitals) || hospitals.length === 0) {
-    //   console.warn("❌ Hospital list is empty or invalid");
-    //   return res.status(400).json({ error: "At least one hospital is required." });
-    // }
 
-    // // Validate hospital IDs
-    // const validHospitals = await hospitalsModel.find({
-    //   _id: { $in: hospitals }
-    // });
+    // =========== Handle Hospital Input ===========
+    let hospitalIds: mongoose.Types.ObjectId[] = [];
 
-    // if (validHospitals.length !== hospitals.length) {
-    //   console.warn("❌ Some hospital IDs are invalid");
-    //   return res.status(400).json({ error: "One or more hospital IDs are invalid." });
-    // }
+    if (Array.isArray(hospitals) && hospitals.length > 0) {
+      const first = hospitals[0];
 
-    const doctor = new doctors({
+      //CASE;Array of objectids
+
+      if (typeof first === 'string' && mongoose.Types.ObjectId.isValid(first)) {
+        const foundHospitals = await hospitalsModel.find({ _id: { $in: hospitals } });
+
+        if (foundHospitals.length !== hospitals.length) {
+          console.warn("Some hospitals IDs are invalid");
+          return res.status(400).json({ error: 'One or more hospital IDs are invalid.' });
+        }
+        hospitalIds = hospitals.map((id: string) => new mongoose.Types.ObjectId(id));
+      }
+
+      //CASE: Array of objects -> create new hospitals
+      else if (typeof first === 'object') {
+        for (const hosp of hospitals) {
+          const requiredHospitalsFields = ['name', 'type', 'address', 'city', 'phone', 'timetable', 'medicationsOffered', 'specialists'];
+          const hasRequiredFields = requiredHospitalsFields.every(field => hosp[field]);
+
+          if (!hasRequiredFields) {
+            return res.status(400).json({ error: 'Missing required fields for creating hospitals inline' });
+          }
+          const newHospital = new hospitalsModel(hosp);
+          const savedHospital = await newHospital.save() as IHospital;
+          hospitalIds.push(savedHospital._id as mongoose.Types.ObjectId);
+          console.log(`Created new hospital : ${savedHospital.name}`);
+
+        }
+      }
+      //CASE: invalid format
+      else {
+        console.warn('Invalid hospital format')
+        return res.status(400).json({ error: 'Invalid format for hospitals field' });
+      }
+
+    }
+
+    const newDoctor = new doctorsModel({
       name,
       age,
       specialization,
-      hospitals,
+      hospitals: hospitalIds,
       experienceYears,
       qualifications,
       availableDays,
@@ -68,8 +95,18 @@ export const addDoctor = async (req: Request, res: Response): Promise<any> => {
       profileImage,
     });
 
-    const savedDoctor = await doctor.save();
-    console.log("✅ Doctor saved:", savedDoctor);
+    const savedDoctor = await newDoctor.save();
+    console.log("✅ Doctor saved:", savedDoctor.name);
+
+    // ========== Backlink to Hospitals ==========
+
+    if (hospitals.length > 0) {
+      await hospitalsModel.updateMany(
+        { _id: { $in: hospitals } },
+        { $addToSet: { doctors: savedDoctor._id } }
+      );
+      console.log('🔁 Linked doctor to hospitals');
+    }
 
     return res.status(201).json({
       message: "Doctor saved successfully",
@@ -88,9 +125,9 @@ export const addDoctor = async (req: Request, res: Response): Promise<any> => {
 
 export const getAllDoctors = async (req: Request, res: Response): Promise<any> => {
   try {
-    const allDoctors = await doctors
+    const allDoctors = await doctorsModel
       .find()
-      //.populate('hospitals', 'name city');
+    //.populate('hospitals', 'name city');
 
     console.log(`✅ Found ${allDoctors.length} doctors`);
     return res.status(200).json(allDoctors);
@@ -113,7 +150,7 @@ export const deleteDoctor = async (req: Request, res: Response): Promise<any> =>
       return res.status(400).json({ error: "Invalid doctor ID" });
     }
 
-    const deleted = await doctors.findByIdAndDelete(id);
+    const deleted = await doctorsModel.findByIdAndDelete(id);
     if (!deleted) {
       console.warn(`❌ Doctor with ID ${id} not found`);
       return res.status(404).json({ message: "Doctor not found" });
@@ -141,7 +178,7 @@ export const updateDoctor = async (req: Request, res: Response): Promise<any> =>
       return res.status(400).json({ error: "Invalid doctor ID" });
     }
 
-    const updatedDoctor = await doctors.findByIdAndUpdate(id, req.body, {
+    const updatedDoctor = await doctorsModel.findByIdAndUpdate(id, req.body, {
       new: true,
       runValidators: true,
     });

@@ -12,6 +12,20 @@ if (!JWT_SECRET) {
     console.error("❌ JWT_SECRET is missing in environment variables.");
 }
 
+//===================
+//Get all users
+//==================
+export const getAllUsers = async (req:Request , res:Response):Promise<any> => {
+    try{
+        const allUsers = await users.find()
+        console.log(` Found ${allUsers.length} users`);
+        return res.status(200).json(allUsers);
+
+    }catch(error){
+        return res.status(500).json({error:"There is some error fetching users"});
+    }
+}
+
 // ==============================
 // REGISTER USER
 // @route POST /api/users/register

@@ -15,6 +15,7 @@ export interface IHospital extends Document {
 }
 
 const hospitalSchema: Schema<IHospital> = new Schema(
+  
   {
     name: {
       type: String,
@@ -73,7 +74,6 @@ const hospitalSchema: Schema<IHospital> = new Schema(
       {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Doctor',
-        required: [true, 'At least one doctor reference is required'],
       },
     ],
 
@@ -90,5 +90,8 @@ const hospitalSchema: Schema<IHospital> = new Schema(
     timestamps: true,
   }
 );
+
+hospitalSchema.index({ name: 1, address: 1, phone: 1 }, { unique: true });
+
 
 export default mongoose.model<IHospital>('Hospitals', hospitalSchema);

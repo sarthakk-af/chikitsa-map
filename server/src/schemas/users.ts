@@ -66,7 +66,7 @@ const userSchema: Schema<IUser> = new Schema({
         type: String,
         required: [true, 'Password is required'],
         minlength: [6, 'Password must be atleast 6 characters'],
-        maxlength: [20, 'Password cannot exceed 50 characters'],
+        maxlength: [50, 'Password cannot exceed 50 characters'],
         select:false,
     },
 },
