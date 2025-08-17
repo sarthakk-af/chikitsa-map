@@ -136,13 +136,14 @@ export const addHospital = async (req: Request, res: Response): Promise<any> => 
 export const getAllHospitals = async (req: Request, res: Response): Promise<any> => {
     try {
 
-        const allHospitals = await hospitals.find().populate('doctors');
+        const allHospitals = await hospitalsModel.find();    
+        console.log(`✅ Found ${allHospitals.length} doctors`);
         return res.status(200).json(allHospitals);
     } catch (error) {
         console.error("Error in getAllHospitals controller:", error);
         return res.status(500).json({ error: "Internal server error while fetching hospitals" });
     }
-}
+};
 
 // ==============================
 // DELETE HOSPITAL CONTROLLER

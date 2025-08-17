@@ -1,7 +1,39 @@
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Menu, X } from "lucide-react";
+import DoctorCard from "../components/DoctorCard";
+import DoctorModal from "../components/DoctorModal";
+import { FaArrowRight, FaInfoCircle } from "react-icons/fa";
+import HospitalCard from "../components/HospitalCard";
+import HospitalModal from "../components/HospitalModal";
+
+interface Doctor {
+  _id: string;
+  name: string;
+  age: number;
+  specialization: string;
+  experienceYears: number;
+  qualifications: string[];
+  availableDays: string[];
+  timings: { day: string; from: string; to: string }[];
+  isAvailable: boolean;
+  profileImage?: string;
+  hospitals: { name: string }[];
+}
+
+interface Hospital {
+  _id: string;
+  name: string;
+  type: string;
+  address: string;
+  city: string;
+  phone: string;
+  timetable: string;
+  medicationsOffered: string[];
+  doctors: { name: string }[];
+  specialists: string[];
+}
 
 // Define types for feature items
 interface Feature {
@@ -16,6 +48,38 @@ const Home: React.FC = () => {
   const [drawerOpen, setDrawerOpen] = useState<boolean>(false);
 
   const year: number = new Date().getFullYear();
+
+  {
+    /*Doctor vala part*/
+  }
+  const [doctors, setDoctors] = useState<Doctor[]>([]);
+  const [selectedDoctor, setSelectedDoctor] = useState<Doctor | null>(null);
+  useEffect(() => {
+    fetch("http://localhost:5000/api/doctors/getAllDoctors")
+      .then((res) => {
+        if (!res.ok) throw new Error("Network response was not ok");
+        return res.json();
+      })
+      .then((data) => setDoctors(data))
+      .catch((err) => console.error("Fetch error", err));
+  }, []);
+
+  {
+    /*Hospital vala part*/
+  }
+  const [hospitals, setHospitals] = useState<Hospital[]>([]);
+  const [selectedHospital, setSelectedHospital] = useState<Hospital | null>(
+    null
+  );
+  useEffect(() => {
+    fetch("http://localhost:5000/api/hospitals/getAllHospitals")
+      .then((res) => {
+        if (!res.ok) throw new Error("Network response was not ok");
+        return res.json();
+      })
+      .then((data) => setHospitals(data))
+      .catch((err) => console.error("Fetch error", err));
+  }, []);
 
   const scrollToSection = (id: string): void => {
     const section = document.getElementById(id);
@@ -296,102 +360,103 @@ const Home: React.FC = () => {
       {/* Doctors Section */}
       <section id="doctors-section" className="py-20 bg-gray-50 px-6">
         <motion.h3
-          initial={{ opacity: 0, y: 30 }}
+          initial={{ opacity: 0, y: 3 }}
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
           viewport={{ once: false }}
           className="text-4xl font-bold text-center mb-12 text-blue-900 tracking-tight"
         >
-          Meet Doctors
+          Know Doctors
         </motion.h3>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-          {[1, 2, 3].map((_: number, i: number) => (
-            <motion.div
-              key={i}
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              whileHover={{
-                y: -10,
-                boxShadow: "0 10px 20px rgba(0, 0, 0, 0.1)",
-              }}
-              transition={{ delay: i * 0.2, duration: 0.6 }}
-              viewport={{ once: true }}
-              className="bg-white p-6 rounded-xl shadow-md transition-all duration-300 border-t-4 border-teal-500"
-            >
-              <div className="flex items-center justify-between mb-4">
-                <h4 className="text-xl font-semibold text-blue-900">
-                  Dr. Example {i + 1}
-                </h4>
-                <span className="text-sm px-3 py-1 bg-teal-100 text-teal-600 rounded-full font-medium">
-                  Available
-                </span>
-              </div>
-              <p className="text-gray-600 text-sm mb-2">Cardiologist</p>
-              <p className="text-sm text-gray-500 mb-2">
-                Experience:{" "}
-                <span className="font-medium text-gray-700">5+ years</span>
-              </p>
-              <button
-                onClick={() => navigate("/doctors/profile")}
-                className="text-teal-500 hover:text-teal-600 font-medium text-sm"
-                aria-label={`View profile of Dr. Example ${i + 1}`}
-              >
-                View Profile →
-              </button>
-            </motion.div>
+
+        <div className="grid grid-cols-1 sm:grid-cols2 lg:grid-cols-3 gap-10 max-w-7xl mx-auto">
+          {doctors.slice(0, 3).map((doc) => (
+            <DoctorCard
+              key={doc._id}
+              doctor={doc}
+              onClick={() => setSelectedDoctor(doc)}
+            />
           ))}
+          {selectedDoctor && (
+            <DoctorModal
+              isOpen={selectedDoctor !== null}
+              doctor={selectedDoctor}
+              onClose={() => setSelectedDoctor(null)}
+            />
+          )}
+          <div></div>
+          <motion.div
+            className="text-center mt-10 text-gray-700 text-base sm:text-lg font-medium"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+          >
+            <div className="inline-flex items-center gap-3 px-3 py-4 bg-white rounded-xl shadow-sm border border-teal-100 hover:shadow-md transtion duration-300">
+              <FaInfoCircle className="text-teal-500 text-xl" />
+              <span>
+                Want to explore more ?{" "}
+                <button
+                  onClick={() => navigate("/doctors")}
+                  className="text-teal-600 font-semibold hover:underline inline-flex items-center gap-1"
+                >
+                  Visit the Doctors Page
+                  <FaArrowRight className="ml-1" />
+                </button>
+              </span>
+            </div>
+          </motion.div>
         </div>
       </section>
 
       {/* Hospitals Section */}
-      <section id="hospitals-section" className="py-20 bg-white px-6">
+      <section id="hospitals-section" className="py-20 bg-gray-50 px-6">
         <motion.h3
-          initial={{ opacity: 0, y: 30 }}
+          initial={{ opacity: 0, y: 3 }}
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
-          viewport={{ once: true }}
+          viewport={{ once: false }}
           className="text-4xl font-bold text-center mb-12 text-blue-900 tracking-tight"
         >
-          Nearby Hospitals
+          Hospitals
         </motion.h3>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-          {[1, 2, 3].map((_: number, i: number) => (
-            <motion.div
-              key={i}
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              whileHover={{
-                y: -10,
-                boxShadow: "0 10px 20px rgba(0, 0, 0, 0.1)",
-              }}
-              transition={{ delay: i * 0.2, duration: 0.6 }}
-              viewport={{ once: true }}
-              className="bg-white p-6 rounded-xl shadow-md transition-all duration-300 border-t-4 border-teal-500"
-            >
-              <div className="flex items-center justify-between mb-4">
-                <h4 className="text-xl font-semibold text-blue-900">
-                  Hospital {i + 1}
-                </h4>
-                <span className="text-sm px-3 py-1 bg-teal-100 text-teal-600 rounded-full font-medium">
-                  Beds Available
-                </span>
-              </div>
-              <p className="text-gray-600 text-sm mb-2">
-                Location: Area {i + 1}
-              </p>
-              <p className="text-sm text-gray-500 mb-2">
-                Emergency:{" "}
-                <span className="text-red-600 font-medium">24/7</span>
-              </p>
-              <button
-                onClick={() => navigate("/hospitals/profile")}
-                className="text-teal-500 hover:text-teal-600 font-medium text-sm"
-                aria-label={`Visit website of Hospital ${i + 1}`}
-              >
-                Visit Website →
-              </button>
-            </motion.div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg-grid-cols-3 gap-10 max-w-7xl mx-auto">
+          {hospitals.slice(0, 4).map((hosp) => (
+            <HospitalCard
+              key={hosp._id}
+              hospital={hosp}
+              onClick={() => setSelectedHospital(hosp)}
+            />
           ))}
+          {selectedHospital && (
+            <HospitalModal
+              isOpen={selectedHospital !== null}
+              hospital={selectedHospital}
+              onClose={() => setSelectedHospital(null)}
+            />
+          )}
+           <div className="items-center">
+          <motion.div
+            className="text-center mt-10 text-gray-700 text-base sm:text-lg font-medium"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+          >
+            <div className="inline-flex items-center gap-3 px-3 py-4 bg-white rounded-xl shadow-sm border border-teal-100 hover:shadow-md transtion duration-300">
+              <FaInfoCircle className="text-teal-500 text-xl" />
+              <span>
+                Want to explore more ?{" "}
+                <button
+                  onClick={() => navigate("/doctors")}
+                  className="text-teal-600 font-semibold hover:underline inline-flex items-center gap-1"
+                >
+                  Visit the Doctors Page
+                  <FaArrowRight className="ml-1" />
+                </button>
+              </span>
+            </div>
+          </motion.div>
+          </div>
         </div>
       </section>
 

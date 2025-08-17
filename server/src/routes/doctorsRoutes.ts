@@ -6,6 +6,7 @@ import { isAdmin } from '../middleware/isAdmin';
 
 
 const router = express.Router();
+router.use(express.json());
 
 router.delete('/deleteDoctor/:id',deleteDoctor)
 router.post('/addDoctor',addDoctor);
