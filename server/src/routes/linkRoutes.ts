@@ -23,6 +23,6 @@ export default router;
 router.post('/doctor-to-hospital',verifyToken,isAdmin,linkDoctorToHospital)
 router.post('/hospital-to-doctor',verifyToken,isAdmin,linkHospitalToDoctor)
 
-router.delete('doctor-from-hospital',isAdmin,verifyToken,unlinkDoctorfromHospital)
-router.delete('/hospital-from-doctor',isAdmin,verifyToken,unlinkHospitalfromDoctor)
+router.delete('/doctor-from-hospital',verifyToken, isAdmin,unlinkDoctorfromHospital)
+router.delete('/hospital-from-doctor',verifyToken,isAdmin,unlinkHospitalfromDoctor)
 

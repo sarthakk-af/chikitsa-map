@@ -279,39 +279,47 @@ const Home: React.FC = () => {
         )}
       </>
       {/* Hero Section */}
-      <section className="relative text-center py-32 px-6 bg-gradient-to-br from-blue-50 to-teal-50 overflow-hidden">
+      <section className="relative text-center px-6 bg-gradient-to-br from-blue-50 to-teal-50 overflow-hidden min-h-screen flex flex-col justify-center">
         <div className="max-w-4xl mx-auto z-10 relative">
           <motion.h2
             initial={{ opacity: 0, y: 50 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, ease: "easeOut" }}
-            className="text-5xl md:text-6xl font-extrabold text-blue-900 mb-6 tracking-tight"
+            className="text-5xl md:text-6xl font-extrabold text-blue-900 mb-6 tracking-tight leading-tight"
           >
             Your Health, <span className="text-teal-500">Simplified</span>
           </motion.h2>
+
           <motion.p
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2, duration: 0.8, ease: "easeOut" }}
-            className="text-gray-600 text-lg md:text-xl mb-8 leading-relaxed"
+            className="text-gray-600 text-lg md:text-xl mb-10 leading-relaxed"
           >
             Discover trusted doctors and hospitals with real-time availability
             and AI-powered insights, all in one place.
           </motion.p>
+
           <motion.button
             whileHover={{
-              scale: 1.05,
-              boxShadow: "0 8px 25px rgba(45, 212, 191, 0.3)",
+              scale: 1.08,
+              boxShadow: "0 12px 30px rgba(45, 212, 191, 0.4)",
             }}
             whileTap={{ scale: 0.95 }}
             onClick={() => scrollToSection("doctors-section")}
-            className="px-8 py-3 bg-teal-500 text-white rounded-full shadow-lg hover:bg-teal-600 transition font-semibold"
+            className="px-10 py-4 bg-teal-500 text-white rounded-full shadow-lg hover:bg-teal-600 transition font-semibold text-lg"
             aria-label="Navigate to doctors section"
           >
             Find a Doctor
           </motion.button>
         </div>
-        <div className="absolute inset-0 bg-teal-100 opacity-20 blur-3xl rounded-full z-0"></div>
+
+        {/* Animated glow background */}
+        <motion.div
+          animate={{ scale: [1, 1.2, 1], opacity: [0.2, 0.3, 0.2] }}
+          transition={{ duration: 8, repeat: Infinity }}
+          className="absolute inset-0 bg-teal-100 opacity-20 blur-3xl rounded-full z-0"
+        />
       </section>
 
       {/* Features Section */}
@@ -369,7 +377,7 @@ const Home: React.FC = () => {
           Know Doctors
         </motion.h3>
 
-        <div className="grid grid-cols-1 sm:grid-cols2 lg:grid-cols-3 gap-10 max-w-7xl mx-auto">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10 max-w-7xl mx-auto">
           {doctors.slice(0, 3).map((doc) => (
             <DoctorCard
               key={doc._id}
@@ -377,6 +385,7 @@ const Home: React.FC = () => {
               onClick={() => setSelectedDoctor(doc)}
             />
           ))}
+
           {selectedDoctor && (
             <DoctorModal
               isOpen={selectedDoctor !== null}
@@ -384,14 +393,17 @@ const Home: React.FC = () => {
               onClose={() => setSelectedDoctor(null)}
             />
           )}
-          <div></div>
+        </div>
+
+        {/* Info box - separated below grid */}
+        <div className="w-full flex justify-center mt-12">
           <motion.div
-            className="text-center mt-10 text-gray-700 text-base sm:text-lg font-medium"
+            className="text-center text-gray-700 text-base sm:text-lg font-medium"
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
           >
-            <div className="inline-flex items-center gap-3 px-3 py-4 bg-white rounded-xl shadow-sm border border-teal-100 hover:shadow-md transtion duration-300">
+            <div className="inline-flex items-center gap-3 px-4 py-4 bg-white rounded-xl shadow-sm border border-teal-100 hover:shadow-md transition duration-300">
               <FaInfoCircle className="text-teal-500 text-xl" />
               <span>
                 Want to explore more ?{" "}
@@ -420,14 +432,16 @@ const Home: React.FC = () => {
           Hospitals
         </motion.h3>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg-grid-cols-3 gap-10 max-w-7xl mx-auto">
-          {hospitals.slice(0, 4).map((hosp) => (
+        {/* Hospitals grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10 max-w-7xl mx-auto">
+          {hospitals.slice(0, 3).map((hosp) => (
             <HospitalCard
               key={hosp._id}
               hospital={hosp}
               onClick={() => setSelectedHospital(hosp)}
             />
           ))}
+
           {selectedHospital && (
             <HospitalModal
               isOpen={selectedHospital !== null}
@@ -435,28 +449,30 @@ const Home: React.FC = () => {
               onClose={() => setSelectedHospital(null)}
             />
           )}
-           <div className="items-center">
+        </div>
+
+        {/* Info box - clearly separated */}
+        <div className="w-full flex justify-center mt-12">
           <motion.div
-            className="text-center mt-10 text-gray-700 text-base sm:text-lg font-medium"
+            className="text-center text-gray-700 text-base sm:text-lg font-medium"
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
           >
-            <div className="inline-flex items-center gap-3 px-3 py-4 bg-white rounded-xl shadow-sm border border-teal-100 hover:shadow-md transtion duration-300">
+            <div className="inline-flex items-center gap-3 px-4 py-4 bg-white rounded-xl shadow-sm border border-teal-100 hover:shadow-md transition duration-300">
               <FaInfoCircle className="text-teal-500 text-xl" />
               <span>
                 Want to explore more ?{" "}
                 <button
-                  onClick={() => navigate("/doctors")}
+                  onClick={() => navigate("/hospitals")}
                   className="text-teal-600 font-semibold hover:underline inline-flex items-center gap-1"
                 >
-                  Visit the Doctors Page
+                  Visit the Hospitals Page
                   <FaArrowRight className="ml-1" />
                 </button>
               </span>
             </div>
           </motion.div>
-          </div>
         </div>
       </section>
 
